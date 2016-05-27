@@ -1,0 +1,78 @@
+<?php
+namespace SMB;
+
+/**
+ * Load Configure file (configure.json)
+ * @author jonathan bak
+ *
+ */
+class Configure
+{
+    const BASE = 'configure';
+    const EXTENSION = 'json';
+    const DOT = '.';
+
+    static $base = null;
+    static $site = array();
+    static $db = array();
+
+    public static function load($configFileName = '')
+    {
+        $configFileName = empty($configFileName)? Directory::CONFIG . DIRECTORY_SEPARATOR . self::DEFAULT_INCLUDE_FILE . self::DOT . self::EXTENSION : Directory::CONFIG_SITE . DIRECTORY_SEPARATOR . $configFileName .self::DOT . self::EXTENSION ;
+        $configFile = Directory::base() . DIRECTORY_SEPARATOR . $configFileName;
+        $configure = file_get_contents($configFile);
+        return json_decode($configure, true);
+    }
+
+    public static function base()
+    {
+        if(self::$base == null){
+            $configFileName = Directory::base() . DIRECTORY_SEPARATOR . self::BASE . self::DOT . self::EXTENSION;
+            if(is_file($configFileName)==false) throw new ConfigureException("기본 설정 파일을 찾을수 없습니다. (".$configFileName.")");
+            $configure = file_get_contents($configFileName);
+            self::$base = json_decode($configure, true);
+        }
+        return self::$base;
+    }
+
+    public static function site( $key = '' )
+    {
+        $config = self::base();
+        $currentSiteAlias = '';
+        foreach($config['siteConfigure'] as $siteUrl => $siteAlias){
+            if( $_SERVER['HTTP_HOST'] == $siteUrl ){
+                $currentSiteAlias = $siteAlias;
+            }
+        }
+        //사이트 URL과 일치하는 config 파일을 찾을수 없습니다.
+        if(!$currentSiteAlias) throw new ConfigureException('Not Found Site config file.');
+
+        if(isset($config['baseDir'])) Directory::setBase($config['baseDir']);
+
+        if(empty(self::$site[$currentSiteAlias])){
+            $configFileName = Directory::base() . DIRECTORY_SEPARATOR . Directory::CONFIG_SITE . DIRECTORY_SEPARATOR . $currentSiteAlias . self::DOT . self::EXTENSION;
+            if(is_file($configFileName)==false) throw new ConfigureException($currentSiteAlias." 사이트 설정 파일을 찾을수 없습니다. (".$configFileName.")");
+            $configure = file_get_contents($configFileName);
+            self::$site[$currentSiteAlias] = json_decode($configure, true);
+        }
+        return $key? self::$site[$currentSiteAlias][$key] : self::$site[$currentSiteAlias];
+    }
+
+    public static function db( $dbName = '' )
+    {
+        $dbInfoFile = self::site('dbset');
+        if(empty(self::$db[$dbInfoFile])){
+            $dbConfigFile = Directory::config_db() . DIRECTORY_SEPARATOR . $dbInfoFile . self::DOT . self::EXTENSION;
+            if(is_file($dbConfigFile)==false) throw new ConfigureException($dbInfoFile." 디비 설정 파일을 찾을수 없습니다. (".$dbConfigFile.")");
+            $configure = file_get_contents($dbConfigFile);
+            self::$db[$dbInfoFile] = json_decode($configure, true);
+        }
+
+        return $dbName? self::$db[$dbInfoFile][$dbName] : self::$db[$dbInfoFile];
+    }
+}
+
+class ConfigureException extends Exception
+{
+
+}

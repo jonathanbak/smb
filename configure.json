@@ -1,0 +1,12 @@
+{
+    "host": "devd.kr",
+    "description": "Multi Site Manager Framework",
+    "charset": "utf-8",
+    "displayErrors": "on",
+    "allowIps": ["123.143.195.28","127.0.0.1"],
+    "siteConfigure": {
+    		"smb.devd.loc":"devd.loc",
+    		"smb.devd.co.kr":"devd.real"
+    	},
+  "baseDir": "tests/example"
+}
