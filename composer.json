@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SMB\\": "src/SMB"
+            "SMB\\": "src/smb"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SMB\\": "tests/SMB"
+            "SMB\\": "tests/smb"
         }
     }
 }
