@@ -1,5 +1,5 @@
 {
-    "name": "jonathanbak/SMB",
+    "name": "jonathanbak/smb",
     "description":"Multiple Site Manager for PHP",
     "keywords":["framework","multi domain","muliple","site manager"],
     "type":"library",
@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SMB\\": "src/smb"
+            "SMB\\": "src/SMB"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SMB\\": "tests/smb"
+            "SMB\\": "tests/SMB"
         }
     }
 }
