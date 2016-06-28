@@ -52,7 +52,7 @@ class System extends Object
      */
     public function bg( $cmd, $blockRedundancy = true )
     {
-        $this->setPidFilePath();
+        $this->setPidFilePath($cmd);
         if($this->isRunning() && $blockRedundancy){
             return false;
         }else{
