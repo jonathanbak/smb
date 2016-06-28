@@ -57,9 +57,18 @@ class System extends Object
             return false;
         }else{
             $cmdFile = $this->cmdFile . " " . implode(' ',$this->params);
-            //로컬에서 ?스트하려면 아래 PHP실행경로를 맞추어 주어야 합니다
-            ///박상원 PC: /Applications/MAMP/bin/php/php5.2.17/bin/php , 실서버 테스트서버 : /usr/local/php/bin/php
-            exec(sprintf("/usr/local/php/bin/php %s >> %s 2>&1 & echo $! > %s", $cmdFile, $this->logFile, $this->pidFile ));
+            $return = exec("whereis php", $result);
+//            $return = "php: /usr/bin/php /etc/php.d /etc/php.ini /usr/lib64/php /usr/include/php /usr/local/php /usr/share/php /usr/share/man/man1/php.1.gz";
+            $whereIsPhpList = explode(' ',str_replace("php:","",$return));
+            $phpScriptFile = '';
+            foreach($whereIsPhpList as $phpFile ){
+                if(is_file($phpFile)) {
+                    $phpScriptFile = $phpFile;
+                    break;
+                }
+            }
+
+            exec(sprintf($phpScriptFile." %s >> %s 2>&1 & echo $! > %s", $cmdFile, $this->logFile, $this->pidFile ));
             return true;
         }
     }
