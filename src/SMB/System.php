@@ -67,8 +67,8 @@ class System extends Object
                     break;
                 }
             }
+            $result = exec(sprintf($phpScriptFile. ' "'. Directory::html() . '/index.php"' ." %s >> %s 2>&1 & echo $! > %s", 'http://'.Configure::site('host') .'/' . $cmd, $this->logFile, $this->pidFile ));
 
-            exec(sprintf($phpScriptFile." %s >> %s 2>&1 & echo $! > %s", $cmdFile, $this->logFile, $this->pidFile ));
             return true;
         }
     }
