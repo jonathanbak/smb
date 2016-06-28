@@ -42,7 +42,7 @@ themselves. To create libraries/packages please read the
     ``` json
     {
         "require": {
-            ""jonathanbak/smb":"~1.0"
+            "jonathanbak/smb":"~1.0"
         }
     }
     ```
