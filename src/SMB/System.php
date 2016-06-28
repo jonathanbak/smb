@@ -67,7 +67,7 @@ class System extends Object
                     break;
                 }
             }
-            $result = exec(sprintf($phpScriptFile. ' "'. Directory::html() . '/index.php"' ." %s >> %s 2>&1 & echo $! > %s", 'http://'.Configure::site('host') .'/' . $cmd, $this->logFile, $this->pidFile ));
+            $result = exec(sprintf($phpScriptFile. ' "'. Directory::html() . '/index.php"' ." %s >> \"%s\" 2>&1 & echo $! > \"%s\"", 'http://'.Configure::site('host') .'/' . $cmd, $this->logFile, $this->pidFile ));
 
             return true;
         }
@@ -133,8 +133,10 @@ class System extends Object
             if(is_file($this->pidFile)){
                 $pid = file_get_contents($this->pidFile);
                 $result = shell_exec(sprintf('ps %d', $pid));
-                if(count(preg_split("/\n/", $result)) > 2) {
-                    return true;
+                foreach(preg_split("/\n/", $result) as $res){
+                    if(preg_match('/'.$pid.' /i',$res,$tmpMatch)){
+                        return true;
+                    }
                 }
             }
         } catch(\Exception $e) {
