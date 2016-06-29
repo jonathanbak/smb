@@ -63,6 +63,7 @@ class Router
      */
     protected function autoload()
     {
+        System::config();
         $siteConfig = Configure::site();
         $siteNamespace = $siteConfig['namespace']."\\";
 
@@ -139,7 +140,6 @@ class Router
      */
     protected function cli($uri, $action = '')
     {
-        System::config( $uri );
         if(empty($action)) {
             $action = function(){
                 System::execute();
