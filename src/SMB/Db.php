@@ -107,9 +107,14 @@ class Db extends ExtensionBridge
     public function arrayToRealEscape( $params = array() )
     {
         foreach($params as $k=> $value){
-            $params[$k] = mysql_real_escape_string($value);
+            $params[$k] = self::realEscapeString($value);
         }
         return $params;
+    }
+    
+    public static function realEscapeString( $value )
+    {
+        return get_magic_quotes_gpc()? $value : mysqli_real_escape_string($value);
     }
 
     /**
@@ -121,7 +126,7 @@ class Db extends ExtensionBridge
     {
         $tmpVal = array();
         foreach($arrayVal as $val){
-            $tmpVal[] = "'".mysql_real_escape_string($val)."'";
+            $tmpVal[] = "'".self::realEscapeString($val)."'";
         }
 
         return $tmpVal;
@@ -136,7 +141,7 @@ class Db extends ExtensionBridge
     {
         $tmpVal = array();
         foreach($params as $k => $val){
-            if(preg_match('/^([0-9]+)$/i',$k,$tmpMatch)==false) $tmpVal[] = " `$k` = "." '".mysql_real_escape_string($val)."'";
+            if(preg_match('/^([0-9]+)$/i',$k,$tmpMatch)==false) $tmpVal[] = " `$k` = "." '".self::realEscapeString($val)."'";
         }
         return $tmpVal;
     }

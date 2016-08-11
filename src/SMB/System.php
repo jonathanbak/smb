@@ -73,7 +73,7 @@ class System extends Object
         }
     }
     
-    protected function config( $cmd )
+    protected function config( $cmd = '' )
     {
         if($this->isCli()==true ){
             if(empty($_SERVER['REMOTE_ADDR'])){

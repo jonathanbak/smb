@@ -229,7 +229,7 @@ class Router
         }
 
         if(is_object($currentUri)){
-            $currentUri();
+            call_user_func_array($currentUri, array());
         }else{
             if(count($currentUri)==1 && empty($currentUri[0])){
                 $currentUri = $this->getUri($routeConfig['autoload']);
