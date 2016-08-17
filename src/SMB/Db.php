@@ -42,6 +42,11 @@ class Db extends ExtensionBridge
         return call_user_func_array(array($lastConnectDb, $method), $args);
     }
 
+    public function getConnection()
+    {
+        return $this->_parents[0]->driver->getConnect();
+    }
+
     /**
      * @param $query    실행쿼리
      * @return null|resource
@@ -114,7 +119,7 @@ class Db extends ExtensionBridge
     
     public static function realEscapeString( $value )
     {
-        return get_magic_quotes_gpc()? $value : mysqli_real_escape_string($value, null);
+        return get_magic_quotes_gpc()? $value : mysqli_real_escape_string( self::getConnection(), $value);
     }
 
     /**
