@@ -114,7 +114,7 @@ class Db extends ExtensionBridge
     
     public static function realEscapeString( $value )
     {
-        return get_magic_quotes_gpc()? $value : mysqli_real_escape_string($value);
+        return get_magic_quotes_gpc()? $value : mysqli_real_escape_string($value, null);
     }
 
     /**
