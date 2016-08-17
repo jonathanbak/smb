@@ -136,18 +136,19 @@ class Router
      * 해당 URI에 대해 CLI 모드에서만 동작하게 만든다
      * @param $uri
      * @param string $action
+     * @param bool $blockRedundancy
      * @throws Exception
      */
-    protected function cli($uri, $action = '')
+    protected function cli($uri, $action = '', $blockRedundancy = true )
     {
         if(empty($action)) {
-            $action = function(){
-                System::execute();
+            $action = function() use($blockRedundancy){
+                System::execute(null, $blockRedundancy);
             };
         }else{
             $uri = $action;
-            $action = function() use($uri){
-                System::execute($uri);
+            $action = function() use($uri, $blockRedundancy){
+                System::execute($uri, $blockRedundancy);
             };
         }
         return $this->addRoute('GET', $uri, $action);

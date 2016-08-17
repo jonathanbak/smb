@@ -104,12 +104,12 @@ class System extends Object
         }
     }
 
-    protected function execute( $cmd = '' )
+    protected function execute( $cmd = '', $blockRedundancy = true )
     {
         if(empty($cmd)) $cmd = $this->cmdFile;
 
         if($this->isCli()==true ){
-            if($this->isRunning()) throw new Exception("이미 실행중인 커맨드 입니다.");
+            if($this->isRunning() && $blockRedundancy) throw new Exception("이미 실행중인 커맨드 입니다.");
             $this->makePidFile();
             Router::callClassByUri( Router::getUri($cmd) );
         }else {
