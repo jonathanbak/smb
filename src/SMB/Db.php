@@ -44,7 +44,10 @@ class Db extends ExtensionBridge
 
     public function getConnection()
     {
-        return $this->_parents[0]->driver->getConnect();
+        $lastConnectDb = array_pop(self::$db);
+        array_push(self::$db, $lastConnectDb);
+
+        return $lastConnectDb->_parents[0]->driver->getConnection()->getResource();
     }
 
     /**
