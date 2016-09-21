@@ -49,3 +49,27 @@ themselves. To create libraries/packages please read the
 
 3. Run Composer: `php composer.phar install`
 4. Browse for more packages on [Packagist](https://packagist.org).
+
+
+Folder Structure
+-------------------
+
+SMB 사용시 추천하는 폴더 구조는 아래와 같습니다. 
+
+    .
+    ├── app
+    │   ├── _tmp            # 임시폴더, 캐쉬파일과 로그 생성
+    │   ├── controllers     # URL에서 접근하는 controller 파일
+    │   ├── models          # 모델 파일, 주요 로직
+    │   └── views           # View 폴더
+    │       ├── css             # css 파일
+    │       ├── images          # images 파일
+    │       ├── js              # javascript 파일
+    │       └── tpl             # tpl 파일 (html 파일)
+    ├── config              # 설정 파일
+    │   ├── db              # DB 정보 설정 파일
+    │   └── site            # 사이트 설정 파일
+    ├── html                # 실제 웹서버의 DOCUMENT_ROOT
+    └── vendor              # Composer 라이브러리 폴더
+    
+**app 폴더 하위 구조**는 *config/site/usersiteurl.json 파일안에서 별도 정의가 가능합니다.*
