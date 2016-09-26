@@ -102,7 +102,7 @@ class Router
      */
     protected function staticFiles( $staticUri = ''){
         $charset = Configure::site('charset');
-        if(preg_match('/^(js|css|images){1}\/(.+)/i',$staticUri,$tmpMimeMatch)){
+        if(preg_match('/^(js|css|images|fonts){1}\/(.+)/i',$staticUri,$tmpMimeMatch)){
             $mimeFilePath = '';
             switch($tmpMimeMatch[1]){
                 case 'images':
@@ -117,6 +117,10 @@ class Router
                 case 'css':
                     $mimeFilePath = Directory::sitePath('view.css') . DIRECTORY_SEPARATOR .$tmpMimeMatch[2];
                     header("Content-type: text/css; charset=".strtoupper($charset));
+                    break;
+                case 'fonts':
+                    $mimeFilePath = Directory::sitePath('view.fonts') . DIRECTORY_SEPARATOR .$tmpMimeMatch[2];
+                    header("Content-type: application/octet-stream; charset=".strtoupper($charset));
                     break;
                 default:
                     //$mimeFilePath = $arrDirs['html'] . '/' .$ctrFileName;

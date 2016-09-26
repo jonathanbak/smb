@@ -25,13 +25,18 @@ class Controller
         }
     }
 
-    public function displayHTML()
+    public function displayHTML( $tpl = '' )
     {
         $protoperties = get_object_vars($this);
-        $callerClass = get_class($this);
-        $callerClass = str_replace('\\',DIRECTORY_SEPARATOR,strtolower( str_replace($this->config['namespace'].'\\','',$callerClass) ));
-        $callerFunc = debug_backtrace()[1]['function'];
-        $tplFile = $callerClass . DIRECTORY_SEPARATOR . strtolower($callerFunc);
+        if(!$tpl){
+            $callerClass = get_class($this);
+            $callerClass = str_replace('\\',DIRECTORY_SEPARATOR,strtolower( str_replace($this->config['namespace'].'\\','',$callerClass) ));
+            $callerFunc = debug_backtrace()[1]['function'];
+            $tplFile = $callerClass . DIRECTORY_SEPARATOR . strtolower($callerFunc);
+        }else {
+            $tplFile = $tpl;
+        }
+
         $this->tpl->displayHTML($tplFile, $protoperties);
     }
 
