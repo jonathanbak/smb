@@ -320,7 +320,7 @@ class Template_
 			}
 		}
 
-		include_once dirname(__FILE__).'/Template_.compiler.php';
+		include_once dirname(__FILE__).'/Template_Compiler_.php';
 		$compiler=new Template_Compiler_;
 		$compiler->_compile_template($this, $template_path, $compile_base, $compile_header);
 		

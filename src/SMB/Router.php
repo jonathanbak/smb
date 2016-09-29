@@ -255,6 +255,11 @@ class Router
         $loadClassName = $siteNamespace . '\\' . implode('\\', $this->ucfirstArray($currentUri));
         if(class_exists($loadClassName)) {
             $callClass = new $loadClassName();
+            $methodList = get_class_methods($callClass);
+            $START_METHOD = 'main';
+            if(in_array($START_METHOD,$methodList)){
+                call_user_func_array(array($callClass, $START_METHOD), array());
+            }
         }else{
             $method = array_pop($currentUri);
             $loadClassName = $siteNamespace . '\\' . implode('\\', $this->ucfirstArray($currentUri));

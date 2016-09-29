@@ -19,10 +19,6 @@ class Controller
         ob_start();
         $this->config = Configure::site();
         $this->tpl = new Template();
-        $methodList = get_class_methods($this);
-        if(in_array(self::START_METHOD,$methodList)){
-            call_user_func_array(array($this, self::START_METHOD), array());
-        }
     }
 
     public function displayHTML( $tpl = '' )
