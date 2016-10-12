@@ -71,6 +71,9 @@ class Router
             $siteNamespace => array(Directory::sitePath('controller')),
             $siteNamespace."Model\\"=> array(Directory::sitePath('model'))
         ));
+        //방화벽 가동
+        Firewall::ruleStart();
+
         //실제 작업 시작
         $this->execute();
     }
