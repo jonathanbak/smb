@@ -42,7 +42,7 @@ class Db extends ExtensionBridge
         return call_user_func_array(array($lastConnectDb, $method), $args);
     }
 
-    public function getConnection()
+    public static function getConnection()
     {
         $lastConnectDb = array_pop(self::$db);
         array_push(self::$db, $lastConnectDb);
