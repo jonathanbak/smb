@@ -1,6 +1,11 @@
 README
 ======
 
+이 프로젝트는 더이상 사용하지 않습니다.
+
+[Php Simple Framework](https://github.com/jonathanbak/psf) 로 다시 시작합니다.
+
+
 What is SMB?
 ------------
 
