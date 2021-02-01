@@ -5,7 +5,7 @@ namespace SMB;
  * User: jonathan.bak
  * Date: 2016. 2. 23.
  */
-class System extends Object
+class System extends Singleton
 {
     const MULTI = false;
     const ONE = true;

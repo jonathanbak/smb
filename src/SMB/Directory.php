@@ -6,7 +6,7 @@ namespace SMB;
  * @author jonathan bak
  *
  */
-class Directory extends Object
+class Directory extends Singleton
 {
     const CONFIG = 'config';
     const CONFIG_SITE = 'config/site';

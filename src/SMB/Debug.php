@@ -6,7 +6,7 @@
  */
 namespace SMB;
 
-class Debug extends Object
+class Debug extends Singleton
 {
     private $logFileName = "{site}_debug_{date}.log";
 

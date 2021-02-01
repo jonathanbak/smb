@@ -8,7 +8,7 @@
 namespace SMB;
 
 
-class Object
+class Singleton
 {
     protected static $instances = array();
 

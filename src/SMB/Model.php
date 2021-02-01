@@ -8,7 +8,7 @@
 namespace SMB;
 
 
-class Model extends Object
+class Model extends Singleton
 {
     protected $db = null;
 
