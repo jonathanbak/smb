@@ -21,6 +21,11 @@ class Controller
         $this->tpl = new Template();
     }
 
+    public function define( $defineValues = array() )
+    {
+        $this->tpl->define($defineValues);
+    }
+
     public function displayHTML( $tpl = '' )
     {
         $protoperties = get_object_vars($this);

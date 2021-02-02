@@ -72,10 +72,12 @@ class System extends Singleton
             return true;
         }
     }
-    
+
     protected function config( $cmd = '' )
     {
-        if($this->isCli()==true ){
+        $backtrace = debug_backtrace();
+        $backtrace = array_pop($backtrace);
+        if($this->isCli()==true && $backtrace['function']!='spl_autoload_call' && $backtrace['function']!='include'){
             if(empty($_SERVER['REMOTE_ADDR'])){
                 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
             }

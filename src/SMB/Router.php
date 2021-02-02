@@ -27,7 +27,7 @@ class Router
      */
     public static function getInstance(){
         if(self::$instance==null) self::$instance = new self();
-        
+
         return self::$instance;
     }
 
@@ -56,26 +56,55 @@ class Router
         }
     }
 
+    protected function loadIncludeSite( $includeSites = array() )
+    {
+        $originSite = Configure::getCurrentSite();
+
+        foreach($includeSites as $siteUrl ){
+            Configure::setCurrentSite($siteUrl);
+            $siteConfig = Configure::site();
+            $siteNamespace = $siteConfig['namespace']."\\";
+
+            Autoloader::setPsr4(array(
+                $siteNamespace => array(Directory::sitePath('controller')),
+                $siteNamespace."Model\\"=> array(Directory::sitePath('model'))
+            ));
+        }
+
+        Configure::setCurrentSite($originSite);
+    }
+
     /**
      * 자동 라우팅 처리 start
+     * @param $autoload
      * @throws ConfigureException
      * @throws DirectoryException
      */
-    protected function autoload()
+    protected function autoload( $autoload = true )
     {
         System::config();
         $siteConfig = Configure::site();
         $siteNamespace = $siteConfig['namespace']."\\";
 
+        if(!empty($siteConfig['displayErrors']) && ($siteConfig['displayErrors'] == 1 || strtolower($siteConfig['displayErrors']) == 'on') ){
+            ini_set('display_errors','On');
+        }else {
+            ini_set('display_errors','Off');
+        }
+
         Autoloader::setPsr4(array(
             $siteNamespace => array(Directory::sitePath('controller')),
             $siteNamespace."Model\\"=> array(Directory::sitePath('model'))
         ));
+
+        //자동 로드되어야 할 사이트가 있다면
+        if(!empty($siteConfig['include_sites'])) $this->loadIncludeSite($siteConfig['include_sites']);
+
         //방화벽 가동
         Firewall::ruleStart();
 
         //실제 작업 시작
-        $this->execute();
+        if($autoload) $this->execute();
     }
 
     /**
@@ -100,12 +129,13 @@ class Router
     /**
      * Image, Javascript, CSS 파일등 정적파일 출력
      * @param string $staticUri
+     * @throws RouterException
      * @throws ConfigureException
      * @throws DirectoryException
      */
     protected function staticFiles( $staticUri = ''){
         $charset = Configure::site('charset');
-        if(preg_match('/^(js|css|images|fonts){1}\/(.+)/i',$staticUri,$tmpMimeMatch)){
+        if(preg_match('/^(js|css|images){1}\/(.+)/i',$staticUri,$tmpMimeMatch)){
             $mimeFilePath = '';
             switch($tmpMimeMatch[1]){
                 case 'images':
@@ -121,10 +151,6 @@ class Router
                     $mimeFilePath = Directory::sitePath('view.css') . DIRECTORY_SEPARATOR .$tmpMimeMatch[2];
                     header("Content-type: text/css; charset=".strtoupper($charset));
                     break;
-                case 'fonts':
-                    $mimeFilePath = Directory::sitePath('view.fonts') . DIRECTORY_SEPARATOR .$tmpMimeMatch[2];
-                    header("Content-type: application/octet-stream; charset=".strtoupper($charset));
-                    break;
                 default:
                     //$mimeFilePath = $arrDirs['html'] . '/' .$ctrFileName;
                     break;
@@ -132,7 +158,7 @@ class Router
             if(is_file($mimeFilePath)){
                 echo file_get_contents($mimeFilePath);
             }else{
-                $this->error("Not Found File. {$mimeFilePath}",404);
+                throw new RouterException("Not Found File. {$mimeFilePath}",404);
             }
             exit;
         }
@@ -213,8 +239,9 @@ class Router
         //현재 URL 에 맞는 route 실행
         $routeConfig = Configure::site('route');
         $currentUri = $this->getUri();
+        $customParams = array();
 
-        $this->staticFiles(implode(DIRECTORY_SEPARATOR,$currentUri));
+        $this->staticFiles(implode('/',$currentUri));
 
         if(count($this->routes)===0){
 
@@ -226,18 +253,29 @@ class Router
                 if(preg_match('/^\//i',$uri,$tmpMatch)){
                     $uri = substr($uri, 1);
                 }
-                if($uri == implode('/', $arrUri) && in_array(strtoupper($_SERVER['REQUEST_METHOD']),$method) ){
+                if(preg_match('/'.str_replace('/','\/',$uri).'/i',implode('/', $arrUri),$tmpMatch) && in_array(strtoupper($_SERVER['REQUEST_METHOD']),$method) ){
                     if(is_object($action)){
                         $currentUri = $action;
+                        array_shift($tmpMatch);
+                        $customParams = $tmpMatch;
                     } else{
                         $currentUri = $this->getUri($action);
                     }
                 }
+
+//                if($uri == implode('/', $arrUri) && in_array(strtoupper($_SERVER['REQUEST_METHOD']),$method) ){
+//                    if(is_object($action)){
+//                        $currentUri = $action;
+//                    } else{
+//                        $currentUri = $this->getUri($action);
+//                    }
+//                }
             }
         }
 
         if(is_object($currentUri)){
-            call_user_func_array($currentUri, array());
+//            var_dump($customParams);
+            call_user_func_array($currentUri, $customParams);
         }else{
             if(count($currentUri)==1 && empty($currentUri[0])){
                 $currentUri = $this->getUri($routeConfig['autoload']);

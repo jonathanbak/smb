@@ -25,4 +25,9 @@ class Model extends Singleton
     {
         $this->db = Db::connect($dbName);
     }
+
+    public function disconnect()
+    {
+        $this->db->disconnect();
+    }
 }

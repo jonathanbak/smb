@@ -15,6 +15,7 @@ class Configure
     static $base = null;
     static $site = array();
     static $db = array();
+    static $currentSite = null;
 
     public static function load($configFileName = '')
     {
@@ -24,10 +25,15 @@ class Configure
         return json_decode($configure, true);
     }
 
+    public static function getBaseFile()
+    {
+        return Directory::base() . DIRECTORY_SEPARATOR . self::BASE . self::DOT . self::EXTENSION;
+    }
+
     public static function base()
     {
         if(self::$base == null){
-            $configFileName = Directory::base() . DIRECTORY_SEPARATOR . self::BASE . self::DOT . self::EXTENSION;
+            $configFileName = self::getBaseFile();
             if(is_file($configFileName)==false) throw new ConfigureException("기본 설정 파일을 찾을수 없습니다. (".$configFileName.")");
             $configure = file_get_contents($configFileName);
             self::$base = json_decode($configure, true);
@@ -35,12 +41,23 @@ class Configure
         return self::$base;
     }
 
+    public static function setCurrentSite( $siteUrl )
+    {
+        self::$currentSite = $siteUrl;
+    }
+
+    public static function getCurrentSite()
+    {
+        return !empty(self::$currentSite)? self::$currentSite : $_SERVER['HTTP_HOST'];
+    }
+
     public static function site( $key = '' )
     {
         $config = self::base();
-        $currentSiteAlias = '';
+        $selectSite = self::getCurrentSite();
+        $currentSiteAlias = $selectSite;
         foreach($config['siteConfigure'] as $siteUrl => $siteAlias){
-            if( $_SERVER['HTTP_HOST'] == $siteUrl ){
+            if( $selectSite == $siteUrl ){
                 $currentSiteAlias = $siteAlias;
             }
         }
@@ -58,9 +75,20 @@ class Configure
         return $key? self::$site[$currentSiteAlias][$key] : self::$site[$currentSiteAlias];
     }
 
-    public static function db( $dbName = '' )
+    public static function setSite($host , $redirectSite = '')
     {
-        $dbInfoFile = self::site('dbset');
+        if(!$redirectSite) $redirectSite = $host;
+        self::$base['siteConfigure'][$host] = $redirectSite;
+    }
+
+    public static function setSiteConfigure($redirectSite, $siteConfigure = array())
+    {
+        self::$site[$redirectSite] = $siteConfigure;
+    }
+
+    public static function db( $dbName = '',  $dbInfoFile = '')
+    {
+        if(!$dbInfoFile) $dbInfoFile = self::site('dbset');
         if(empty(self::$db[$dbInfoFile])){
             $dbConfigFile = Directory::config_db() . DIRECTORY_SEPARATOR . $dbInfoFile . self::DOT . self::EXTENSION;
             if(is_file($dbConfigFile)==false) throw new ConfigureException($dbInfoFile." 디비 설정 파일을 찾을수 없습니다. (".$dbConfigFile.")");

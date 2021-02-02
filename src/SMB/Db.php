@@ -10,15 +10,22 @@ namespace SMB;
 
 class Db extends ExtensionBridge
 {
-    public static $db = array();
-    public static $config = null;
+    static $db = array();
+    static $config = null;
+    protected $dbName = '';
 
     public function __construct( $dbName = '' )
     {
+        $this->dbName =$dbName;
         $options = Configure::db( $dbName );
         $options = array_merge($options, array('options' => array('buffer_results' => true)));;
-        
-        parent::addExt(new \Zend\Db\Adapter\Adapter($options));
+
+        parent::addExt(new \Zend\Db\Adapter\Adapter($options), $dbName);
+    }
+
+    public function getDbName()
+    {
+        return $this->dbName;
     }
 
     /**
@@ -28,10 +35,23 @@ class Db extends ExtensionBridge
      */
     public static function connect($dbName = '')
     {
-        if (isset(self::$db[$dbName]) == false) {
-            self::$db[$dbName] = new self($dbName);
+        $baseDir = Directory::siteRoot();
+        $backtrace = debug_backtrace();
+        $callerFileName = '';
+        foreach($backtrace as $fileInfo){
+            if(!preg_match('/\/SMB\//i', $fileInfo['file'], $tmpMatch)){
+                $callerFileName = $fileInfo['file'];
+                break;
+            }
         }
-        return self::$db[$dbName];
+        if($callerFileName) $callerFileName = preg_replace('/(.+\/models\/)(.+)/iU','\2',$callerFileName);
+
+        $callerFileName = sha1($callerFileName);
+
+        if (empty(self::$db[$callerFileName]) == true) {
+            self::$db[$callerFileName] = new self($dbName);
+        }
+        return static::$db[$callerFileName];
     }
 
     public static function __callStatic($method, $args)
@@ -44,10 +64,37 @@ class Db extends ExtensionBridge
 
     public static function getConnection()
     {
-        $lastConnectDb = array_pop(self::$db);
-        array_push(self::$db, $lastConnectDb);
+        $baseDir = Directory::siteRoot();
+        $backtrace = debug_backtrace();
+        $callerFileName = '';
+        foreach($backtrace as $fileInfo){
+            if(!preg_match('/\/SMB\//i', $fileInfo['file'], $tmpMatch)){
+                $callerFileName = $fileInfo['file'];
+                break;
+            }
+        }
+        if($callerFileName) $callerFileName = preg_replace('/(.+\/models\/)(.+)/iU','\2',$callerFileName);
 
-        return $lastConnectDb->_parents[0]->driver->getConnection()->getResource();
+        $callerFileName = sha1($callerFileName);
+//        $lastConnectDb = array_pop(self::$db);
+//        array_push(self::$db, $lastConnectDb);
+        if(!empty(self::$db[$callerFileName])){
+            $currentConnectDb = self::$db[$callerFileName];
+            $dbName = $currentConnectDb->getDbName();
+            return $currentConnectDb->_parents[$dbName]->driver->getConnection()->getResource();
+        }else {
+            $lastConnectDb = array_pop(self::$db);
+            array_push(self::$db, $lastConnectDb);
+            $dbName = $lastConnectDb->getDbName();
+            return $lastConnectDb->_parents[$dbName]->driver->getConnection()->getResource();
+        }
+
+    }
+
+    public function disconnect()
+    {
+        $dbName = $this->getDbName();
+        return $this->_parents[$dbName]->driver->getConnection()->disconnect();
     }
 
     /**
@@ -56,7 +103,13 @@ class Db extends ExtensionBridge
      */
     public function query($query, $params = array())
     {
-        return $this->_parents[0]->query($query)->execute($params);
+        $dbName = $this->getDbName();
+        if(preg_match('/^call /i',$query,$tmpMatch)){
+            return ($this->_parents[$dbName]->query($query, \Zend\Db\Adapter\Adapter::QUERY_MODE_EXECUTE)->current()->getArrayCopy());
+//            return $this->_parents[0]->query($query, \Zend\Db\Adapter\Adapter::QUERY_MODE_EXECUTE);
+        }
+
+        return $this->_parents[$dbName]->query($query)->execute($params);
     }
 
     /**
@@ -82,6 +135,11 @@ class Db extends ExtensionBridge
      */
     public function fetch($query, $params = array())
     {
+        $dbName = $this->getDbName();
+        if(preg_match('/^call /i',$query,$tmpMatch)){
+            return $this->_parents[$dbName]->query($query, \Zend\Db\Adapter\Adapter::QUERY_MODE_EXECUTE)->current()->getArrayCopy();
+        }
+
         return $this->query($query, $params)->current();
     }
 
@@ -119,7 +177,7 @@ class Db extends ExtensionBridge
         }
         return $params;
     }
-    
+
     public static function realEscapeString( $value )
     {
         return get_magic_quotes_gpc()? $value : mysqli_real_escape_string( self::getConnection(), $value);

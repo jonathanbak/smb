@@ -1,6 +1,5 @@
 <?php
 /**
- * 서로 다른 클래스 연결
  * User: jonathan.bak
  * Date: 2016. 5. 3.
  */
@@ -15,11 +14,13 @@ Abstract class ExtensionBridge
     protected $_parents = array();
     public $_this;
 
-    function __construct(){$_this = $this;}
+    function __construct(){
+        $_this = $this;
+    }
 
-    public function addExt($object)
+    public function addExt($object, $dbName)
     {
-        $this->_exts[]=$object;
+        $this->_exts[$dbName]=$object;
         $this->_parents = $this->_exts;
     }
 
