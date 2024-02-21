@@ -48,8 +48,11 @@ class Debug extends Singleton
     public function _log( $messages,  $loggroup = 'common')
     {
         $messages = "[".date("Y-m-d H:i:s")."] (".$loggroup.") ".$_SERVER['REMOTE_ADDR']." - ". $messages ."\n" ;
+        if(!file_exists($this->logFileName)){
+            touch($this->logFileName);
+            chmod($this->logFileName, 0777);
+        }
         file_put_contents($this->logFileName, $messages, FILE_APPEND);
-        chmod($this->logFileName, 0777);
     }
 
     public function unicode_decode($str)
